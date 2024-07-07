@@ -1,0 +1,1 @@
+web: gunicorn synctokenapi.wsgi
