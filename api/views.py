@@ -29,7 +29,7 @@ class PessoasTodayViewSet(PessoasAllViewSet, viewsets.ModelViewSet):
     API endpoint that allows users to be viewed or edited.
     """
     hoje = Pessoa.today()
-    queryset = Pessoa.objects.filter(created_at=hoje).order_by("NdaFicha")
+    queryset = Pessoa.objects.filter(last_update=hoje).order_by("NdaFicha")
 
 
 class RelatoriosViewSet(viewsets.ModelViewSet):

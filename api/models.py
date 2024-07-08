@@ -56,15 +56,17 @@ class Pessoa (models.Model):
         return timezone.now().date()
 
     def save(self, *args, **kwargs):
-        is_new = not Pessoa.objects.filter(pk=self.pk).exists()
-        if is_new:
-            with transaction.atomic():
-                today = timezone.now().date()
-                count_today = Pessoa.objects.filter(
-                    created_at=today).count()
-                self.NdaFicha = count_today + 1
-                print(
-                    f"Debug: NdaFicha set to {self.NdaFicha} for date {today}")
+        # Pegue a data de hoje baseado no fuso horário local
+        today = timezone.now().date()
+
+        # Conte quantas pessoas já compareceram hoje
+        count_today = Pessoa.objects.filter(last_update=today).count()
+
+        # Use transações atômicas para evitar concorrência
+        with transaction.atomic():
+            # Adicione o número da ficha do indivíduo
+            self.NdaFicha = count_today + 1
+
         super().save(*args, **kwargs)  # Salva o objeto no banco de dados
         # Atualiza ou cria um relatório para o dia atual
         self.update_daily_report()
