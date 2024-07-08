@@ -59,13 +59,20 @@ class Pessoa (models.Model):
         # Pegue a data de hoje baseado no fuso horário local
         today = timezone.now().date()
 
-        # Conte quantas pessoas já compareceram hoje
-        count_today = Pessoa.objects.filter(last_update=today).count()
-
         # Use transações atômicas para evitar concorrência
         with transaction.atomic():
-            # Adicione o número da ficha do indivíduo
-            self.NdaFicha = count_today + 1
+            # Conte quantas pessoas já compareceram hoje
+            count_today = Pessoa.objects.filter(last_update=today).count()
+
+            if self.pk:
+                # Verifica se o objeto já existe e foi criado hoje
+                pessoa = Pessoa.objects.get(pk=self.pk)
+                if pessoa.created_at == today and pessoa.last_update == today:
+                    pass
+                elif pessoa.last_update != today:
+                    self.NdaFicha = count_today + 1
+            else:
+                self.NdaFicha = count_today + 1
 
         super().save(*args, **kwargs)  # Salva o objeto no banco de dados
         # Atualiza ou cria um relatório para o dia atual
