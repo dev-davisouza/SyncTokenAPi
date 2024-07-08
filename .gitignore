@@ -1,5 +1,5 @@
 __pycache__
 .pytest_cache
 venv
-db.sqlite3
 .env
+db.sqlite3
