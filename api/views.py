@@ -38,7 +38,7 @@ class RelatoriosViewSet(viewsets.ModelViewSet):
     API endpoint that allows users to just see data.
     """
     # Prefetch dados de Pessoa relacionados e filtra relatórios do dia atual
-    queryset = Relatorios.objects.prefetch_related('pessoas')
+    queryset = Relatorios.objects.all()
     serializer_class = RelatoriosSerializer
     permission_classes = [permissions.AllowAny]
 
