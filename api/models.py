@@ -66,10 +66,13 @@ class Pessoa (models.Model):
 
             if self.pk:
                 # Verifica se o objeto já existe e foi criado hoje
-                pessoa = Pessoa.objects.get(pk=self.pk)
-                if pessoa.created_at == today and pessoa.last_update == today:
-                    pass
-                elif pessoa.last_update != today:
+                try:
+                    pessoa = Pessoa.objects.get(pk=self.pk)
+                    if pessoa.created_at == today and pessoa.last_update == today:
+                        pass
+                    elif pessoa.last_update != today:
+                        self.NdaFicha = count_today + 1
+                except:
                     self.NdaFicha = count_today + 1
             else:
                 self.NdaFicha = count_today + 1
