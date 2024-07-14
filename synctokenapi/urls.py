@@ -1,7 +1,8 @@
 from django.urls import include, path
 from rest_framework import routers
-from api.views import get_acoes, get_prioridades, get_status_choices, get_doctypes
+from api.views import get_acoes, get_prioridades, get_status_choices, get_doctypes, is_auth, login_user
 from api import views
+from django.contrib import admin
 
 
 router = routers.DefaultRouter()
@@ -16,10 +17,13 @@ router.register(r'relatorios', views.RelatoriosViewSet,
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path('', include(router.urls)),
+    path('admin/', admin.site.urls),
     path('api-auth/', include(
         'rest_framework.urls', namespace='rest_framework')),
     path('acoes/', get_acoes, name='get_acoes'),
     path('prioridades/', get_prioridades, name='get_prioridades'),
     path('status_choices/', get_status_choices, name='get_status_choices'),
     path('doctypes/', get_doctypes, name='get_doctypes'),
+    path('is-auth/', is_auth, name='get_is-auth'),
+    path('login/', login_user, name="login_user")
 ]

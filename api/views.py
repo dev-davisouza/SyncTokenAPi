@@ -1,8 +1,30 @@
 from django.http import JsonResponse
 from rest_framework import viewsets, permissions
-from rest_framework.exceptions import NotFound
+from rest_framework.decorators import api_view
 from .models import Pessoa, Relatorios
 from .serializers import PessoaSerializer, RelatoriosSerializer
+from django.contrib.auth import authenticate, login
+
+
+def is_auth(request):
+    if request.user.is_authenticated:
+        return JsonResponse({'authenticated': True}, safe=False)
+    else:
+        return JsonResponse({'authenticated': False}, safe=False)
+
+
+@api_view(['POST'])
+def login_user(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)
+        return JsonResponse({'authenticated': True}, safe=False)
+    else:
+        return JsonResponse({'detail': "Credenciais não conferem!"},
+                            safe=False, status=401)
 
 
 class EnablePartialUpdateMixin:
