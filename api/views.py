@@ -47,7 +47,7 @@ class PessoasAllViewSet(viewsets.ModelViewSet, EnablePartialUpdateMixin):
     """
     queryset = Pessoa.objects.all().order_by("Nome")
     serializer_class = PessoaSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
     lookup_field = "NIS_CPF"
 
 
@@ -67,7 +67,7 @@ class RelatoriosViewSet(viewsets.ModelViewSet):
     # Prefetch dados de Pessoa relacionados e filtra relatórios do dia atual
     queryset = Relatorios.objects.all()
     serializer_class = RelatoriosSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
 
 
 def get_acoes(request):
