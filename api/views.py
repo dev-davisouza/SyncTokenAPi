@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from .models import Pessoa, Relatorios
 from .serializers import PessoaSerializer, RelatoriosSerializer
 from django.contrib.auth import authenticate, login
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 def is_auth(request):
@@ -21,7 +22,11 @@ def login_user(request):
     user = authenticate(request, username=username, password=password)
     if user is not None:
         login(request, user)
-        return JsonResponse({'authenticated': True}, safe=False)
+        refresh = RefreshToken.for_user(user)
+        return JsonResponse({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }, safe=False)
     else:
         return JsonResponse({'detail': "Credenciais não conferem!"},
                             safe=False, status=401)
@@ -42,7 +47,7 @@ class PessoasAllViewSet(viewsets.ModelViewSet, EnablePartialUpdateMixin):
     """
     queryset = Pessoa.objects.all().order_by("Nome")
     serializer_class = PessoaSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     lookup_field = "NIS_CPF"
 
 
@@ -62,7 +67,7 @@ class RelatoriosViewSet(viewsets.ModelViewSet):
     # Prefetch dados de Pessoa relacionados e filtra relatórios do dia atual
     queryset = Relatorios.objects.all()
     serializer_class = RelatoriosSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 def get_acoes(request):
