@@ -26,7 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRETKEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # Avoid it
+DEBUG = False
+if os.environ.get("DEBUG") == 1:
+    DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -82,10 +84,18 @@ WSGI_APPLICATION = 'synctokenapi.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 """  """
 
-DATABASES = {
-
-    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
-}
+DATABASES = {}
+if os.environ.get('IS_DEV_DATABASE') == '1':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / "db.sqlite3",
+        }
+    }
+else:
+    DATABASES = {
+        'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+    }
 
 
 # Password validation
@@ -149,11 +159,14 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
-    ]
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10  # Número de itens por página
 }
 
 SIMPLE_JWT = {
-    'AUTH_HEADER_TYPES': ('JWT',),
+    'AUTH_HEADER_TYPES': ('JWT', 'Bearer'),
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=6),
 }
 
@@ -179,3 +192,5 @@ CORS_ALLOW_METHODS = [
     'OPTIONS',
     'HEAD',
 ]
+
+APPEND_SLASH = True

@@ -82,6 +82,15 @@ class Pessoa (models.Model):
         # Atualiza ou cria um relatório para o dia atual
         self.update_daily_report()
 
+    def delete(self, *args, **kwargs):
+        today = timezone.now().date()
+        # Ao excluir uma pessoa, verifica se o relatório fica vazio
+        relatorio = Relatorios.objects.filter(data=today).first()
+        if relatorio:
+            relatorio.pessoas.remove(self)
+            relatorio.delete_if_empty()
+        super().delete(*args, **kwargs)
+
     def update_daily_report(self):
         today = timezone.now().date()
         # Cria um novo relatório ou obtém o existente para o dia atual
@@ -97,3 +106,8 @@ class Relatorios (models.Model):
 
     def __str__(self):
         return f"Relatório para {self.data}"
+
+    def delete_if_empty(self):
+        """Exclui o relatório se não houver pessoas associadas."""
+        if self.pessoas.count() == 0:
+            self.delete()

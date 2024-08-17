@@ -1,10 +1,8 @@
 from django.http import JsonResponse
 from rest_framework import viewsets, permissions
-from rest_framework.decorators import api_view
 from .models import Pessoa, Relatorios
 from .serializers import PessoaSerializer, RelatoriosSerializer
-from django.contrib.auth import authenticate, login
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.pagination import PageNumberPagination
 
 
 def is_auth(request):
@@ -14,26 +12,13 @@ def is_auth(request):
         return JsonResponse({'authenticated': False}, safe=False)
 
 
-@api_view(['POST'])
-def login_user(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
-
-    user = authenticate(request, username=username, password=password)
-    if user is not None:
-        login(request, user)
-        refresh = RefreshToken.for_user(user)
-        return JsonResponse({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }, safe=False)
-    else:
-        return JsonResponse({'detail': "Credenciais não conferem!"},
-                            safe=False, status=401)
+class CustomPagination(PageNumberPagination):
+    page_size = 10  # Número de itens por página
+    page_size_query_param = 'page_size'
+    max_page_size = 100  # Limite máximo de itens por página
 
 
 class EnablePartialUpdateMixin:
-
     def update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return super().update(request, *args, **kwargs)
@@ -49,6 +34,7 @@ class PessoasAllViewSet(viewsets.ModelViewSet, EnablePartialUpdateMixin):
     serializer_class = PessoaSerializer
     permission_classes = [permissions.AllowAny]
     lookup_field = "NIS_CPF"
+    pagination_class = CustomPagination
 
 
 class PessoasTodayViewSet(PessoasAllViewSet, viewsets.ModelViewSet):

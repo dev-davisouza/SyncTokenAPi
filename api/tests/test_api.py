@@ -8,41 +8,12 @@ class PessoasAPI(TestCase):
     def setUp(self):
         """Configura o cliente e o URL para os testes."""
         self.client = Client()
-        # Substitua pelo endpoint correto da sua API
+
+        # Endpoint da API
         self.url = 'http://127.0.0.1:8000/pessoas/'
 
-    def test_post_data_is_ok(self):
-        """Teste o envio de dados para a API e verifica a resposta."""
-        # Dados válidos para criar uma nova pessoa
-        data = {
-            'NIS_CPF': '12345678901',
-            'Nome': 'João Silva',
-            'Endereço': 'Rua Teste, 123',
-            'Ação': 'Atualização cadastral',
-            'Prioridade': 'Sim',
-            'Status': 'stts_0'
-        }
-
-        # Envia uma requisição POST para o endpoint da API
-        response = self.client.post(
-            self.url, data, content_type='application/json')
-
-        # Verifica se a resposta tem o status code 201 Created
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        # Verifica se a resposta contém os dados enviados
-        self.assertEqual(response.data['NIS_CPF'], data['NIS_CPF'])
-        self.assertEqual(response.data['Nome'], data['Nome'])
-        self.assertEqual(response.data['Endereço'], data['Endereço'])
-        self.assertEqual(response.data['Ação'], data['Ação'])
-        self.assertEqual(response.data['Prioridade'], data['Prioridade'])
-        self.assertEqual(response.data['Status'], data['Status'])
-
-    def test_relatorio_is_created(self):
-        """Teste se um Relatorio é criado e a nova Pessoa é
-            adicionada ao Relatorio"""
-        # Dados válidos para criar uma nova pessoa
-        data = {
+        # Mock
+        self.data = {
             'NIS_CPF': '98765432100',
             'Nome': 'Maria Oliveira',
             'Endereço': 'Rua Teste, 456',
@@ -51,9 +22,32 @@ class PessoasAPI(TestCase):
             'Status': 'stts_0'
         }
 
+    def test_post_data_is_ok(self):
+        """Teste o envio de dados para a API e verifica a resposta."""
+
         # Envia uma requisição POST para o endpoint da API
         response = self.client.post(
-            self.url, data, content_type='application/json'
+            self.url, self.data, content_type='application/json')
+
+        # Verifica se a resposta tem o status code 201 Created
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Verifica se a resposta contém os dados enviados
+        self.assertEqual(response.data['NIS_CPF'], self.data['NIS_CPF'])
+        self.assertEqual(response.data['Nome'], self.data['Nome'])
+        self.assertEqual(response.data['Endereço'], self.data['Endereço'])
+        self.assertEqual(response.data['Ação'], self.data['Ação'])
+        self.assertEqual(response.data['Prioridade'], self.data['Prioridade'])
+        self.assertEqual(response.data['Status'], self.data['Status'])
+
+    def test_relatorio_is_created(self):
+        """Teste se um Relatorio é criado e a nova Pessoa é
+            adicionada ao Relatorio"""
+        # Dados válidos para criar uma nova pessoa
+
+        # Envia uma requisição POST para o endpoint da API
+        response = self.client.post(
+            self.url, self.data, content_type='application/json'
         )
 
         # Verifica se a resposta tem o status code 201 Created
@@ -65,6 +59,37 @@ class PessoasAPI(TestCase):
 
         # Verifica se a Pessoa foi adicionada ao Relatorio
         self.assertIn(Pessoa.objects.get(
-            NIS_CPF=data['NIS_CPF']), relatorio.pessoas.all())
+            NIS_CPF=self.data['NIS_CPF']), relatorio.pessoas.all())
         # Verifica que a contagem é 1
         self.assertEqual(relatorio.pessoas.count(), 1)
+
+    def test_relatorio_can_do_self_delete(self):
+        """Teste se o relatório deleta a si mesmo caso
+        todas as pessoas tenham sido excluídas"""
+
+        # Envia uma requisição POST para o endpoint da API
+        response = self.client.post(
+            self.url, self.data, content_type='application/json'
+        )
+
+        # Verifica se a resposta tem o status code 201 Created
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Obtém o relatório para hoje
+        today = date.today()
+        relatorio = Relatorios.objects.get(data=today)
+
+        # Pega a pessoa que foi criada
+        pessoa = Pessoa.objects.get(NIS_CPF=self.data['NIS_CPF'])
+
+        # Força a exclusão do objeto de pessoa
+        pessoa.delete()
+
+        # Após excluir a pessoa, verificamos se o relatório foi excluído
+        with self.assertRaises(Relatorios.DoesNotExist):
+            Relatorios.objects.get(data=today)
+
+        """
+         se descomentar este código espere uma excessão
+        relatorio = Relatorios.objects.get(data=today)
+        """
