@@ -14,6 +14,8 @@ class Pessoa (models.Model):
         ("Declaração escolar", "Declaração escolar"),
         ("Gestão de bloqueio/cancelamento", "Gestão de bloqueio/cancelamento"),
         ("Informarção de renda", "Informarção de renda"),
+        ("Consulta", "Consulta"),
+
     ]
 
     AÇÕES.sort()
