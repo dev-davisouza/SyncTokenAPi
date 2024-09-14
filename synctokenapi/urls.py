@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework import routers
 from api.views import (get_acoes, get_prioridades,
-                       get_status_choices, get_doctypes, is_auth)
+                       get_status_choices, get_doctypes, get_model, is_auth)
 from api import views
 from django.contrib import admin
 from rest_framework_simplejwt.views import (
@@ -30,6 +30,7 @@ urlpatterns = [
     path('prioridades/', get_prioridades, name='get_prioridades'),
     path('status_choices/', get_status_choices, name='get_status_choices'),
     path('doctypes/', get_doctypes, name='get_doctypes'),
+    path('model/', get_model, name='get_model'),
     path('is-auth/', is_auth, name='get_is-auth'),
     path('api/token/', TokenObtainPairView.as_view(),
          name='token_obtain_pair'),

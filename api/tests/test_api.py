@@ -5,15 +5,17 @@ from api.models import Pessoa, Relatorios
 
 
 class PessoasAPI(TestCase):
+
     def setUp(self):
         """Configura o cliente e o URL para os testes."""
         self.client = Client()
 
         # Endpoint da API
-        self.url = 'http://127.0.0.1:8000/pessoas/'
+        self.url = 'http://127.0.0.1:8000/pessoas-all/'
 
         # Mock
         self.data = {
+            'DocType': "CPF",
             'NIS_CPF': '98765432100',
             'Nome': 'Maria Oliveira',
             'Endereço': 'Rua Teste, 456',
@@ -39,6 +41,26 @@ class PessoasAPI(TestCase):
         self.assertEqual(response.data['Ação'], self.data['Ação'])
         self.assertEqual(response.data['Prioridade'], self.data['Prioridade'])
         self.assertEqual(response.data['Status'], self.data['Status'])
+
+    def test_put_data_is_ok(self):
+        # Crie um objeto mockado
+        self.client.post(
+            self.url, self.data, content_type='application/json')
+
+        # altere os dados
+        data = self.data
+        data['Status'] = 'stts_2'
+
+        # Pegue o ID e procure na base de dados
+        id = self.data['NIS_CPF']
+
+        # Combine o caminho da URL com o parâmetro de busca
+        url = f'{self.url}{id}/'
+
+        request = self.client.put(
+            url, data, content_type='application/json')
+
+        self.assertEqual(request.status_code, status.HTTP_200_OK)
 
     def test_relatorio_is_created(self):
         """Teste se um Relatorio é criado e a nova Pessoa é
@@ -77,7 +99,7 @@ class PessoasAPI(TestCase):
 
         # Obtém o relatório para hoje
         today = date.today()
-        relatorio = Relatorios.objects.get(data=today)
+        # relatorio = Relatorios.objects.get(data=today)
 
         # Pega a pessoa que foi criada
         pessoa = Pessoa.objects.get(NIS_CPF=self.data['NIS_CPF'])
@@ -88,8 +110,3 @@ class PessoasAPI(TestCase):
         # Após excluir a pessoa, verificamos se o relatório foi excluído
         with self.assertRaises(Relatorios.DoesNotExist):
             Relatorios.objects.get(data=today)
-
-        """
-         se descomentar este código espere uma excessão
-        relatorio = Relatorios.objects.get(data=today)
-        """

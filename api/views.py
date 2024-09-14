@@ -2,7 +2,8 @@ from django.http import JsonResponse
 from rest_framework import viewsets, permissions
 from .models import Pessoa, Relatorios
 from .serializers import PessoaSerializer, RelatoriosSerializer
-from rest_framework.pagination import PageNumberPagination
+from utils.CustomPagination import CustomPagination
+#  from rest_framework.response import Response
 
 
 def is_auth(request):
@@ -10,12 +11,6 @@ def is_auth(request):
         return JsonResponse({'authenticated': True}, safe=False)
     else:
         return JsonResponse({'authenticated': False}, safe=False)
-
-
-class CustomPagination(PageNumberPagination):
-    page_size = 10  # Número de itens por página
-    page_size_query_param = 'page_size'
-    max_page_size = 100  # Limite máximo de itens por página
 
 
 class EnablePartialUpdateMixin:
@@ -30,7 +25,7 @@ class PessoasAllViewSet(viewsets.ModelViewSet, EnablePartialUpdateMixin):
     """
     API endpoint that allows users to be viewed or edited.
     """
-    queryset = Pessoa.objects.all().order_by("Nome")
+    queryset = Pessoa.objects.all().order_by("-Nome")
     serializer_class = PessoaSerializer
     permission_classes = [permissions.AllowAny]
     lookup_field = "NIS_CPF"
@@ -50,10 +45,10 @@ class RelatoriosViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to just see data.
     """
-    # Prefetch dados de Pessoa relacionados e filtra relatórios do dia atual
-    queryset = Relatorios.objects.all()
+    queryset = Relatorios.objects.all().order_by('-data')
     serializer_class = RelatoriosSerializer
     permission_classes = [permissions.AllowAny]
+    pagination_class = CustomPagination
 
 
 def get_acoes(request):
@@ -74,3 +69,18 @@ def get_status_choices(request):
 def get_doctypes(request):
     get_doctypes = dict(Pessoa.DOCTYPES)
     return JsonResponse(get_doctypes, safe=False)
+
+
+def get_model(request):
+    return JsonResponse(
+        {"DocType": "DocType",
+         "NdaFicha": "NdaFicha",
+         "NIS_CPF": "NIS_CPF",
+         "Nome": "Nome",
+         "Endereço": "Endereço",
+         "Ação": "Ação",
+         "created_at": "created_at",
+         "last_update": "last_update",
+         "Prioridade": "Prioridade",
+         "Status": "Status"}
+    )
