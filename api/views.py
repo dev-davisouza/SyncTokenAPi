@@ -25,7 +25,7 @@ class PessoasAllViewSet(viewsets.ModelViewSet, EnablePartialUpdateMixin):
     """
     API endpoint that allows users to be viewed or edited.
     """
-    queryset = Pessoa.objects.all().order_by("-Nome")
+    queryset = Pessoa.objects.all().order_by("-created_at")
     serializer_class = PessoaSerializer
     permission_classes = [permissions.AllowAny]
     lookup_field = "NIS_CPF"
