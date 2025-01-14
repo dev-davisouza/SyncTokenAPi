@@ -36,22 +36,47 @@ class Pessoa (models.Model):
         ("stts_2", "Atendimento encerrado"),
     ]
 
+    benefitSituations = [
+        ('Bloqueado', 'Bloqueado'),
+        ('Cancelado', 'Cancelado'),
+        ('Suspenso', 'Suspenso'),
+        ('Liberado', 'Liberado'),
+        ('Não contemplado', 'Não contemplado'),
+        ('Desconhecido', 'Desconhecido'),
+    ]
+
     DocType = models.CharField(
         "Tipo de documento", "DocType", choices=DOCTYPES, max_length=3,
         default="")
+
     NdaFicha = models.IntegerField(
         "Número da Ficha", "NdaFicha", blank=True, null=True, default=0)
+
     NIS_CPF = models.CharField(
         "NIS ou CPF", "NIS_CPF", max_length=11, unique=True, primary_key=True)
+
     Nome = models.CharField("Nome", "Nome", max_length=120)
+
     Endereço = models.TextField("Endereço", "Endereço")
+
     Ação = models.CharField("Ação", "Ação", choices=AÇÕES, max_length=50)
+
     created_at = models.DateField(auto_now_add=True, editable=False)
+
     last_update = models.DateField(auto_now=True, editable=True)
+
     Prioridade = models.CharField(
         "Prioridade", "Prioridade", choices=PRIORIDADES, max_length=3)
+
     Status = models.CharField(
         "Status", "Status", choices=STATUS_CHOICES, max_length=102)
+
+    benefit_situation = models.CharField(
+        "benefit_situation", "benefit_situation", choices=benefitSituations,
+        max_length=15, default="Desconhecido", null=True, blank=True)
+
+    isUnderInvestigation = models.BooleanField(
+        "isUnderInvestigation", "isUnderInvestigation", null=True, blank=True, default=False)
 
     # Isso é usado la na view, n apague
     @staticmethod
@@ -119,7 +144,7 @@ class Pessoa (models.Model):
     def recalculate_ndaficha():
         today = timezone.localdate()
         pessoas = Pessoa.objects.filter(
-            last_update=today).order_by('created_at')
+            last_update=today).order_by('NdaFicha')
 
         # Recalcula os valores de NdaFicha
         for index, pessoa in enumerate(pessoas, start=1):

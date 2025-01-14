@@ -28,9 +28,9 @@ class AuthAPI(TestCase):
         }, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    """ def test_view_returns_unauthorized_stts_code_for_anonymous(self):
+    def test_view_returns_unauthorized_stts_code_for_anonymous(self):
         request = self.client.get("/pessoas-all/")
-        self.assertEqual(request.status_code, status.HTTP_401_UNAUTHORIZED) """
+        self.assertEqual(request.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_api_jwt_token_can_access_views(self):
         response = self.client.post("/api/token/", {

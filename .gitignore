@@ -4,3 +4,7 @@ venv
 .env
 db.sqlite3
 make_pessoa_mock.py
+djangoDados.sql
+converted_dados.sql
+nota-de-esclarecimento.md
+clarification-note.md

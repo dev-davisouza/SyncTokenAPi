@@ -5,7 +5,6 @@ from .serializers import PessoaSerializer, RelatoriosSerializer
 from utils.CustomPagination import CustomPagination
 #  from rest_framework.response import Response
 
-
 def is_auth(request):
     if request.user.is_authenticated:
         return JsonResponse({'authenticated': True}, safe=False)
