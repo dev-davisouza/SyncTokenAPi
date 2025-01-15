@@ -1,7 +1,8 @@
 from django.urls import include, path
 from rest_framework import routers
 from api.views import (get_acoes, get_prioridades,
-                       get_status_choices, get_doctypes, get_model, is_auth)
+                       get_status_choices, get_doctypes, get_model,
+                       is_auth, get_periods, get_benefit_situations)
 from api import views
 from django.contrib import admin
 from rest_framework_simplejwt.views import (
@@ -32,6 +33,9 @@ urlpatterns = [
     path('doctypes/', get_doctypes, name='get_doctypes'),
     path('model/', get_model, name='get_model'),
     path('is-auth/', is_auth, name='get_is-auth'),
+    path("periods/", get_periods, name="get_periods"),
+    path("benefit_situations/", get_benefit_situations,
+         name="get_benefit_situations"),
     path('api/token/', TokenObtainPairView.as_view(),
          name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(),

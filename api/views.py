@@ -5,6 +5,7 @@ from .serializers import PessoaSerializer, RelatoriosSerializer
 from utils.CustomPagination import CustomPagination
 #  from rest_framework.response import Response
 
+
 def is_auth(request):
     if request.user.is_authenticated:
         return JsonResponse({'authenticated': True}, safe=False)
@@ -81,5 +82,41 @@ def get_model(request):
          "created_at": "created_at",
          "last_update": "last_update",
          "Prioridade": "Prioridade",
-         "Status": "Status"}
+         "Status": "Status",
+         "benefit_situation": 'benefit_situation'}
     )
+
+
+def get_periods(request):
+    # Obtém todos os registros do modelo Relatorio, ordenados por 'id' em ordem decrescente
+    relatorios = Relatorios.objects.all().order_by('-data')
+
+    # Lista para armazenar os períodos únicos
+    dates = []
+
+    for relatorio in relatorios:
+        # Obtém o id do registro
+        date = str(relatorio.data)
+
+        # Remove os últimos 3 caracteres do id
+        final = date[:-3]
+
+        # Adiciona o período se ainda não estiver na lista
+        if final not in dates:
+            dates.append(final)
+
+    # Retorna os períodos como uma resposta JSON
+    return JsonResponse(dates, safe=False)
+
+
+def get_benefit_situations(request):
+    benefitSituations = [
+        'Bloqueado',
+        'Cancelado',
+        'Suspenso',
+        'Liberado',
+        'Não contemplado',
+        'Desconhecido',
+    ]
+
+    return JsonResponse(benefitSituations, safe=False)
