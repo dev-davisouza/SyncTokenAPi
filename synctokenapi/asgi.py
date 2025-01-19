@@ -7,10 +7,20 @@ For more information on this file, see
 https://docs.djangoproject.com/en/5.0/howto/deployment/asgi/
 """
 
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
+from django.core.asgi import get_asgi_application
+import api.routing
 import os
 
-from django.core.asgi import get_asgi_application
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "synctoken.settings")
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'synctokenapi.settings')
-
-application = get_asgi_application()
+application = ProtocolTypeRouter(
+    {
+        "http": get_asgi_application(),
+        "websocket": AuthMiddlewareStack(URLRouter(
+            api.routing.websocket_urlpatterns
+        )
+        ),
+    }
+)

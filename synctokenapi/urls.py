@@ -2,7 +2,8 @@ from django.urls import include, path
 from rest_framework import routers
 from api.views import (get_acoes, get_prioridades,
                        get_status_choices, get_doctypes, get_model,
-                       is_auth, get_periods, get_benefit_situations)
+                       is_auth, get_periods, get_benefit_situations,
+                       DigitadorLoginView, get_icon)
 from api import views
 from django.contrib import admin
 from rest_framework_simplejwt.views import (
@@ -18,6 +19,7 @@ router.register(r'pessoas-all', views.PessoasAllViewSet,
                 basename="pessoas-all-api")
 router.register(r'relatorios', views.RelatoriosViewSet,
                 basename="relatorios-api")
+router.register(r'digitadores', views.DigitadorViewSet, basename="digitadores")
 
 
 # Wire up our API using automatic URL routing.
@@ -36,6 +38,11 @@ urlpatterns = [
     path("periods/", get_periods, name="get_periods"),
     path("benefit_situations/", get_benefit_situations,
          name="get_benefit_situations"),
+    path('nome/icon', get_icon, name='get_icon'),
+
+    path('login/', DigitadorLoginView.as_view(),
+         name='digitador_login'),
+
     path('api/token/', TokenObtainPairView.as_view(),
          name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(),

@@ -1,5 +1,5 @@
 from rest_framework.serializers import SerializerMethodField
-from .models import Pessoa, Relatorios
+from .models import Pessoa, Relatorios, Digitador
 from rest_framework import serializers  # type: ignore
 from utils.CustomPagination import PessoaPagination
 
@@ -20,7 +20,9 @@ class PessoaSerializer(serializers.ModelSerializer):
             'Prioridade',
             'Status',
             'last_update',
-            'DocType'
+            'DocType',
+            'benefit_situation',
+            'isUnderInvestigation'
         ]
         read_only_fields = ['created_at', "last_update"]
 
@@ -44,13 +46,20 @@ class PessoaSerializer(serializers.ModelSerializer):
         return value """
 
     def validate(self, data):
-        """Verifica se todos os podem estar vazios."""
+        """
+        Verifica se os campos obrigatórios estão presentes
+        apenas em criações ou quando relevantes.
+        """
+        if self.instance:  # Atualização parcial
+            return data
+
         required_fields = ['NIS_CPF', 'Nome',
                            'Endereço', 'Ação', 'Prioridade', 'Status']
         for field in required_fields:
             if not data.get(field):
                 raise serializers.ValidationError(
-                    f"O campo {field} é obrigatório e não pode estar vazio.")
+                    {field: f'O campo {field} é obrigatório.'}
+                )
         return data
 
 
@@ -90,3 +99,9 @@ class RelatoriosSerializer(serializers.ModelSerializer):
                 "current_page": paginator.page.number
             }
         } """
+
+
+class DigitadorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Digitador
+        fields = ['username', 'password']

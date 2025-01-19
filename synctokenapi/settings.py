@@ -46,7 +46,16 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'api',
     'corsheaders',
+    "channels",
 ]
+
+ASGI_APPLICATION = 'synctokenapi.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -82,15 +91,14 @@ WSGI_APPLICATION = 'synctokenapi.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-"""  """
 
 """ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / "db.sqlite3",
     }
-}
- """
+} """
+
 DATABASES = {
     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 }
@@ -171,6 +179,7 @@ SIMPLE_JWT = {
 CORS_ALLOW_ALL_ORIGINS = True
 
 
+CORS_ALLOW_CREDENTIALS = True
 # Permite todos os cabeçalhos e métodos para facilitar o desenvolvimento
 CORS_ALLOW_HEADERS = [
     'content-type',

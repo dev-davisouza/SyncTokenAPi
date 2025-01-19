@@ -1,5 +1,7 @@
+from django.contrib.auth.models import User
 from django.db import models, transaction  # Importa o módulo de transações
 from django.utils import timezone
+from utils.hash256 import hash256
 
 
 class Pessoa (models.Model):
@@ -171,3 +173,55 @@ class Relatorios (models.Model):
         empty_reports = cls.objects.annotate(
             num_pessoas=models.Count('pessoas')).filter(num_pessoas=0)
         empty_reports.delete()
+
+
+class Digitador(models.Model):
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, verbose_name="user",
+        name="user", blank=True)
+    username = models.CharField("username", "username", primary_key=True,
+                                unique=True, null=False, blank=False,
+                                max_length=15)
+    # Armazena o hash SHA-256 da senha
+    password = models.CharField(max_length=64, blank=False,
+                                null=False,
+                                help_text="A senha é obrigatória.")
+
+    def save(self, *args, **kwargs):
+        """
+        Sobrescreve o método save para garantir
+        que o User seja criado automaticamente e
+        a senha seja armazenada como hash.
+        """
+        # Cria um User correspondente
+        self.user = User.objects.create_user(
+            username=self.username,
+            password=self.password
+        )
+        # Atualiza a senha do User, se necessário
+        self.user.save()
+
+        # Garante que a senha do Digitador esteja em formato de hash
+        super().save(*args, **kwargs)
+
+    def passwords_match(self, password: str) -> bool:
+        """
+        Compara a senha fornecida com a senha atual armazenada no modelo.
+        :param password: Senha em texto puro fornecida para comparação.
+        :return: True se as senhas coincidirem, False caso contrário.
+        """
+        return hash256(password) == self.password
+
+    @classmethod
+    def authenticate(cls, user: str, password: str) -> bool:
+        """
+        Valida a existência de um usuário pelas credenciais de acesso.
+        :param user: Nome de usuário.
+        :param password: Senha em texto puro.
+        :return: True se as credenciais forem válidas, False caso contrário.
+        """
+        try:
+            digitador = cls.objects.get(user=user)
+            return digitador.passwords_match(password)
+        except cls.DoesNotExist:
+            return False
