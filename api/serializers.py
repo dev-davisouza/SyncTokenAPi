@@ -62,6 +62,12 @@ class PessoaSerializer(serializers.ModelSerializer):
                 )
         return data
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if data.get("benefit_situation") is None:
+            data["benefit_situation"] = "Desconhecido"
+        return data
+
 
 class RelatoriosSerializer(serializers.ModelSerializer):
     pessoas = SerializerMethodField()
